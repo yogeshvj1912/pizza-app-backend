@@ -1,7 +1,7 @@
 const express = require("express")
 const mongodb = require("mongodb")
 const mongoclient = mongodb.MongoClient;
-const URL = "mongodb://0.0.0.0:27017"
+const URL = "mongodb+srv://admin:By3iUis0tmjSiIvI@cluster0.jvegpfy.mongodb.net/?retryWrites=true&w=majority"
 const app = express()
 const bcrypt = require("bcryptjs");
 const jwt=require("jsonwebtoken")
@@ -98,7 +98,7 @@ app.post("/user",authorize,async (req, res) => {
 
 
 app.post("/register", async (req, res) => {
-res.send("hello")
+
 
     try {
         const connection = await mongoclient.connect(URL);
@@ -115,7 +115,7 @@ res.send("hello")
 
         await connection.close();
         res.json(users)
-
+        res.send("hello")
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: "Somthing went wrong" })
