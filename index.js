@@ -114,8 +114,12 @@ app.post("/register", async (req, res) => {
         const users = await collection.insertOne(req.body);
 
         await connection.close();
-        res.json(users)
-        res.send("hello")
+        res.send({
+            users,
+            message:"hello"
+        })
+        // res.json(users)
+        // res.send("hello")
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: "Somthing went wrong" })
@@ -137,6 +141,7 @@ app.post("/login", async (req, res) => {
         if(compare){
         const token= jwt.sign({id:user._id},secret)
         console.log(token);
+        await connection.close();
         res.json({message:"Login Success",token});
         }else{
             res.json({message:"password is wrong"})
@@ -145,7 +150,7 @@ app.post("/login", async (req, res) => {
             res.status(401).json({message:"user not found"})
         }
 
-        await connection.close();
+     
         // res.json(users)
 
     } catch (error) {
