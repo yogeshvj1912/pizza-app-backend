@@ -95,8 +95,8 @@ app.post("/user",authorize,async (req, res) => {
 // })
 
 
-app.post("/register", async (req, res) => {
-
+app.post("https://pizzabackend-2y30.onrender.com/register", async (req, res) => {
+res.send("hello")
 
     try {
         const connection = await mongoclient.connect(URL);
