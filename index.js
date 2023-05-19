@@ -14,7 +14,7 @@ app.use(express.json())
 app.use(cors({
     origin: "http://localhost:3000"
 }))
-const users = [];
+
 app.get("/",(req,res)=>{
     res.json("hello world")
 })
