@@ -113,11 +113,12 @@ app.post("/register", async (req, res) => {
         req.body.password = hash;
         const users = await collection.insertOne(req.body);
 
-        await connection.close();
+       
         res.send({
             users,
             message:"hello"
         })
+        await connection.close();
         // res.json(users)
         // res.send("hello")
     } catch (error) {
