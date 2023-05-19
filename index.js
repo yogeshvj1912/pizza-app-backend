@@ -1,7 +1,7 @@
 const express = require("express")
 const mongodb = require("mongodb")
 const mongoclient = mongodb.MongoClient;
-const URL = "mongodb://127.0.0.1:27017"
+const URL = "mongodb://0.0.0.0:27017"
 const app = express()
 const bcrypt = require("bcryptjs");
 const jwt=require("jsonwebtoken")
@@ -15,7 +15,9 @@ app.use(cors({
     origin: "http://localhost:3000"
 }))
 const users = [];
-
+app.get("/",(req,res)=>{
+    res.json("hello world")
+})
 const authorize=(req,res,next)=>{
     if(req.headers.authorization){
         try{
@@ -31,11 +33,8 @@ const authorize=(req,res,next)=>{
     }
 }
 
-app.get("/", (req, res) => {
-    res.send("Hello, world!");
-  });
-
-
+ 
+ 
 
 // get method
 app.get("/users",authorize,async (req, res) => {
@@ -56,6 +55,9 @@ app.get("/users",authorize,async (req, res) => {
         res.status(500).json({ message: "Somthing went wrong" })
     }
 })
+
+
+
 
 // post method
 app.post("/user",authorize,async (req, res) => {
@@ -95,7 +97,7 @@ app.post("/user",authorize,async (req, res) => {
 // })
 
 
-app.post("https://pizzabackend-2y30.onrender.com/register", async (req, res) => {
+app.post("/register", async (req, res) => {
 res.send("hello")
 
     try {
