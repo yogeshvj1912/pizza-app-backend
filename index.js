@@ -1,7 +1,7 @@
 const express = require("express")
 const mongodb = require("mongodb")
 const mongoclient = mongodb.MongoClient;
-const URL = "mongodb+srv://admin:By3iUis0tmjSiIvI@cluster0.jvegpfy.mongodb.net/?retryWrites=true&w=majority"
+const URL = "mongodb+srv://admin:iXatwYMuvUwaIeMd@cluster0.jvegpfy.mongodb.net/?retryWrites=true&w=majority"
 const app = express()
 const bcrypt = require("bcryptjs");
 const jwt=require("jsonwebtoken")
