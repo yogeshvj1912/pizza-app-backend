@@ -57,6 +57,26 @@ app.get("/users",authorize,async (req, res) => {
 })
 
 
+//get loginemail
+
+app.get("/login-data/:id", async (req, res) => {
+
+    console.log(req.params.id)
+        try {
+            const connection = await mongoclient.connect(URL);
+    
+            const db = connection.db("pizza_delivery")
+            const collection = db.collection("login")
+            
+            const user = await collection.findOne({email : req.params.id})
+    
+            res.json(user)
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Somthing went wrong" })
+        }
+    })
+    
 
 
 // post method
