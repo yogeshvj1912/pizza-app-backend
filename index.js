@@ -7,12 +7,16 @@ const bcrypt = require("bcryptjs");
 const jwt=require("jsonwebtoken")
 const secret ="587vnzmcy9dbsuwtlhx2i1r3fpgoake6"
 const cors = require("cors")
+const bodyParser = require("body-parser")
+const razor_pay = require("razorpay")
 
 
 app.use(express.json())
 
 app.use(cors({
-    origin: "https://effortless-semifreddo-349782.netlify.app"
+    origin: "https://effortless-semifreddo-349782.netlify.app",
+    // origin:"https://api.razorpay.com"
+    //https://effortless-semifreddo-349782.netlify.app
 }))
 
 app.get("/",(req,res)=>{
@@ -51,17 +55,12 @@ app.get("/users",authorize,async (req, res) => {
         await connection.close();
         res.json(users);
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: "Somthing went wrong" })
     }
 })
 
-
-//get loginemail
-
 app.get("/login-data/:id", async (req, res) => {
 
-    console.log(req.params.id)
         try {
             const connection = await mongoclient.connect(URL);
     
@@ -72,11 +71,11 @@ app.get("/login-data/:id", async (req, res) => {
     
             res.json(user)
         } catch (error) {
-            console.log(error)
             res.status(500).json({ message: "Somthing went wrong" })
         }
     })
     
+
 
 
 // post method
@@ -95,7 +94,6 @@ app.post("/user",authorize,async (req, res) => {
         await connection.close();
         res.json({ message: "Successfully inserted" });
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: "Somthing went wrong" })
     }
 })
@@ -142,7 +140,7 @@ app.post("/register", async (req, res) => {
         // res.json(users)
         // res.send("hello")
     } catch (error) {
-        console.log(error)
+     
         res.status(500).json({ message: "Somthing went wrong" })
     }
 })
@@ -161,7 +159,6 @@ app.post("/login", async (req, res) => {
         const compare= await bcrypt.compare(req.body.password,user.password)
         if(compare){
         const token= jwt.sign({id:user._id},secret)
-        console.log(token);
         await connection.close();
         res.json({message:"Login Success",token});
         }else{
@@ -175,12 +172,116 @@ app.post("/login", async (req, res) => {
         // res.json(users)
 
     } catch (error) {
-        console.log(error)
+      
         res.status(500).json({ message: "Somthing went wrong" })
     }
 })
 
 
+app.post("/address",authorize,async (req, res) => {
+    let connection;
+
+    try {
+         connection = await mongoclient.connect(URL);
+
+        const db = connection.db("pizza_delivery")
+
+        const collection = db.collection("address")
+
+        // const findEmail = await collection.findOne({email:req.body.email})
+    
+
+        const updateData = await collection.updateOne({email:req.body.email},{
+            $set:{ fname: req.body.fname,
+                phoneNumber: req.body.phoneNumber,
+                address: req.body.address,
+                pincode: req.body.pincode,}
+        })
+        console.log(updateData)
+        if(updateData.matchedCount === 1){
+            
+             res.json({message:"The data Successfully updaated"})
+        }else{
+       const operation = await collection.insertOne(req.body);
+    
+       res.json({ message: "Successfully inserted" });
+        }
+        
+
+      
+    } catch (error) {
+        res.status(500).json({ message: "Somthing went wrong" })
+    }
+    if(connection){
+        await connection.close();
+    }
+})
+
+
+app.get("/address",authorize,async (req, res) => {
+
+    try {
+        const connection = await mongoclient.connect(URL);
+
+        const db = connection.db("pizza_delivery")
+
+        const collection = db.collection("address")
+
+        const users = await collection.find({}).toArray();
+
+        await connection.close();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: "Somthing went wrong" })
+    }
+})
+
+
+
+   // Razorpay intergaration //
+
+const razorpay=new razor_pay({
+    key_id:"rzp_test_6MdqrCywquzUyj",
+    key_secret:"fOtScLGJAe5C0hPgD10VE6j5"
+});
+
+app.post('/api/payment/orders', async (req, res) => {
+    const { amount, currency, receipt } = req.body;
+
+    try {
+        const connection = await mongoclient.connect(URL);
+
+        const db = connection.db("pizza_delivery")
+
+        const collection = db.collection("orders")
+
+
+        const options = {
+            amount: amount * 100, // amount in smallest currency unit (paisa for INR)
+            currency: currency || "INR",
+            receipt: receipt || "order_rcptid_11",
+        };
+
+        const order = await razorpay.orders.create(options);
+
+        // Insert the order data into MongoDB
+        const orderData = {
+            orderId: order.id,
+            amount: order.amount,
+            currency: order.currency,
+            receipt: order.receipt,
+            status: order.status,
+            created_at: new Date(),
+        };
+
+        const result = await collection.insertOne(orderData);
+        await connection.close();
+
+        res.status(200).json(order);
+    } catch (error) {
+        res.status(500).json({ message: 'Something went wrong!', error });
+    }
+});
 
 
 app.listen(8000)
